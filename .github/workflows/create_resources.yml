@@ -37,6 +37,55 @@ jobs:
                 export TF_VAR_my_ip_cidr=$(curl -s https://checkip.amazonaws.com)/32
                 echo "my ip - $TF_VAR_my_ip_cidr"
                 terraform apply -auto-approve
-              
+
+    ansible_configure_job:
+        runs-on: ubuntu-latest
+        needs: terraform_apply
+        steps:
+            - name: Checkout the code
+              uses: actions/checkout@v4
+            
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v5
+              with:
+                role-to-assume: ${{ secrets.OIDC_IAM_ROLE }}
+                aws-region: us-east-1
+            
+            - name: Setup terraform
+              uses: hashicorp/setup-terraform@v3
+              with:
+                terraform_version: 1.7.0
+
+            - name: Initialize terraform
+              run: |
+                terraform init -input=false -no-color \
+                    -backend-config="bucket=${bucket}" 
+            
+            - name: Update the runner IP in security group rules
+              run: |
+                export TF_VAR_my_ip_cidr=$(curl -s https://checkip.amazonaws.com/)/32
+                terraform apply -target=aws_security_group_rule.bastion_ssh_in \
+                                -target=aws_security_group_rule.control_node_ssh_in \
+                                -auto-approve
+            
+            - name: Install Ansible
+              run: |
+                sudo apt-get update -y
+                sudo apt-get install ansible -y
+
+            - name: Run preansible tasks
+              run: |
+                chmod +x preansible-tasks.sh
+                ./preansible-tasks.sh
+
+            - name: Run play for frontend setup
+              env:
+                ANSIBLE_HOST_KEY_CHECKING: False
+              run: ansible-playbook -i inventory.ini frontend_setup.yml
+
+            - name: Run play for backend setup
+              env:
+                ANSIBLE_HOST_KEY_CHECKING: False
+              run: ansible-playbook -i inventory.ini backend_setup.yml
 
             
