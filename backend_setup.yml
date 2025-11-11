@@ -1,0 +1,76 @@
+---
+- name: Setup backend application
+  hosts: backend
+  become: yes
+  vars:
+    app_dir: /home/ec2-user/app
+    db_user: dbuser
+    db_password: Passw0rd123!
+    db_name: mydb
+  tasks:
+    - name: Install dependencies
+      yum:
+        name:
+          - python3
+          - python3-pip
+        state: present
+        update_cache: yes
+
+    - name: Install boto3 for s3 module
+      pip:
+        name: boto3
+        executable: pip3
+    
+    - name: create app directory
+      file:
+        path: "{{ app_dir }}"
+        state: directory
+        owner: ec2-user
+        group: ec2-user
+        mode: '0755'
+
+    - name: Download artifacts from s3 repo
+      amazon.aws.s3_object:
+        bucket: "{{ s3_name }}"
+        object: "{{ item }}"
+        dest: "{{ app_dir }}/{{ item }}"
+        mode: get
+      loop:
+        - app.py
+        - requirements.txt
+
+    - name: install python dependencies
+      pip:
+        requirements: "{{ app_dir }}/requirements.txt"
+        executable: pip3
+
+    - name: setup backend service
+      copy:
+        dest: /etc/systemd/system/backend.service
+        content: |
+          [Unit]
+          Description=Backend Flask App
+          After=network.target
+
+          [Service]
+          User=ec2-user
+          WorkingDirectory={{ app_dir }}
+          Environment="DB_HOST={{ db_endpoint }}"
+          Environment="DB_USER={{ db_user }}"
+          Environment="DB_PASS={{ db_password }}"
+          Environment="DB_NAME={{ db_name }}"
+          ExecStart=/usr/bin/python3 {{ app_dir }}/app.py
+          Restart=always
+
+          [Install]
+          WantedBy=multi-user.target
+    
+    - name: Reload systemd
+      systemd:
+        daemon_reload: yes
+
+    - name: Enable and start backend service
+      systemd:
+        name: backend
+        enabled: yes
+        state: started
