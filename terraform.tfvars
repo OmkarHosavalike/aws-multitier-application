@@ -12,4 +12,4 @@ private_app_subnets = ["10.0.11.0/24", "10.0.12.0/24"]
 
 private_db_subnets = ["10.0.21.0/24", "10.0.22.0/24"]
 
-s3_bucket_name = "my-app-assets-s3-20092025"
+s3_bucket_name = "omkar-app-assets-s3-11112025"

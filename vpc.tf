@@ -16,7 +16,6 @@ locals {
   public_subnet_map = zipmap(local.azs, var.public_subnets)
   app_subnet_map    = zipmap(local.azs, var.private_app_subnets)
   db_subnet_map     = zipmap(local.azs, var.private_db_subnets)
-  my_ip_cidr        = "${chomp(data.http.myip.response_body)}/32"
 }
 
 resource "aws_subnet" "public" {

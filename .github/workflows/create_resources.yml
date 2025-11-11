@@ -1,0 +1,42 @@
+name: Workflow to create aws resources
+on:
+    workflow_dispatch:
+
+permissions:
+    id-token: write
+    contents: read
+
+env:
+    bucket: ${{ secrets.BACKEND_S3_BUCKET }}
+
+jobs:
+    terraform_apply:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout the code
+              uses: actions/checkout@v4
+            
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v5
+              with:
+                role-to-assume: ${{ secrets.OIDC_IAM_ROLE }}
+                aws-region: us-east-1
+            
+            - name: Setup terraform
+              uses: hashicorp/setup-terraform@v3
+              with:
+                terraform_version: 1.7.0
+
+            - name: Initialize terraform
+              run: |
+                terraform init -input=false -no-color \
+                    -backend-config="bucket=${bucket}" 
+            
+            - name: Terraform apply to create resources
+              run: |
+                export TF_VAR_my_ip_cidr=$(curl -s https://checkip.amazonaws.com)/32
+                echo "my ip - $TF_VAR_my_ip_cidr"
+                terraform apply -auto-approve
+              
+
+            

@@ -34,8 +34,8 @@ variable "private_db_subnets" {
   default = ["10.0.21.0/24", "10.0.22.0/24"]
 }
 
-data "http" "myip" {
-  url = "https://checkip.amazonaws.com"
+variable "my_ip_cidr" {
+  type = string
 }
 
 variable "s3_bucket_name" {
@@ -48,11 +48,11 @@ variable "s3_bucket_name" {
 }
 
 variable "instance_type" {
-  default = "t2.micro"
+  default = "t3.micro"
 }
 
 variable "ami_id" {
-  default = "ami-08982f1c5bf93d976"
+  default = "ami-0cae6d6fe6048ca2c"
 }
 
 variable "db_instance_class" {

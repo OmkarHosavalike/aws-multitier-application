@@ -14,7 +14,7 @@ resource "aws_security_group_rule" "bastion_ssh_in" {
   from_port         = 22
   to_port           = 22
   protocol          = "tcp"
-  cidr_blocks       = [local.my_ip_cidr]
+  cidr_blocks       = [var.my_ip_cidr]
 }
 
 resource "aws_security_group_rule" "bastion_all_out" {
@@ -69,7 +69,7 @@ resource "aws_security_group_rule" "control_node_ssh_in" {
   from_port         = 22
   to_port           = 22
   protocol          = "tcp"
-  cidr_blocks       = [local.my_ip_cidr]
+  cidr_blocks       = [var.my_ip_cidr]
 }
 
 resource "aws_security_group_rule" "frontend_all_out" {
