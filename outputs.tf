@@ -58,6 +58,11 @@ output "db_port" {
   value = aws_db_instance.mysql.port
 }
 
+output "db_password" {
+  sensitive = true
+  value = var.db_password
+}
+
 output "key_pair_private_key" {
   value       = tls_private_key.key.private_key_pem
   sensitive   = true

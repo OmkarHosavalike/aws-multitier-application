@@ -68,7 +68,7 @@ variable "db_username" {
 }
 
 variable "db_password" {
-  default = "Passw0rd123!"
+  default = ""
   sensitive = true
 }
 

@@ -5,7 +5,6 @@
   vars:
     app_dir: /home/ec2-user/app
     db_user: dbuser
-    db_password: Passw0rd123!
     db_name: mydb
   tasks:
     - name: Install dependencies

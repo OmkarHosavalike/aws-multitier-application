@@ -8,6 +8,7 @@ permissions:
 
 env:
     bucket: ${{ secrets.BACKEND_S3_BUCKET }}
+    db_pass: ${{ secrets.DATABASE_PASSWORD }}
 
 jobs:
     terraform_apply:
@@ -35,7 +36,7 @@ jobs:
             - name: Terraform apply to create resources
               run: |
                 export TF_VAR_my_ip_cidr=$(curl -s https://checkip.amazonaws.com)/32
-                echo "my ip - $TF_VAR_my_ip_cidr"
+                export TF_VAR_db_password=${db_pass}
                 terraform apply -auto-approve
 
     ansible_configure_job:
