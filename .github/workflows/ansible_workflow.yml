@@ -1,7 +1,13 @@
 name: Run ansible playbooks
 on:
     workflow_call:
-
+        secrets:
+            OIDC_IAM_ROLE:
+                required: true
+                description: 'IAM Role ARN'
+            BACKEND_S3_BUCKET:
+                required: true
+                description: 'Backend s3 bucket for terraform state file'
 permissions:
     id-token: write
     contents: read

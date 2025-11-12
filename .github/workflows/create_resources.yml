@@ -42,4 +42,8 @@ jobs:
     call_ansible_workflow:
       needs: terraform_apply
       uses: ./.github/workflows/ansible_workflow.yml
+      secrets:
+        OIDC_IAM_ROLE: ${{ secrets.OIDC_IAM_ROLE }}
+        BACKEND_S3_BUCKET: ${{ secrets.BACKEND_S3_BUCKET }}
+
         
