@@ -3,7 +3,7 @@ on:
     workflow_dispatch:
 
 permissions:
-    id-token: true
+    id-token: write
     contents: read
 
 env:
