@@ -67,11 +67,14 @@ curl -X POST http://<FRONTEND_PUBLIC_IP>/employees \
   -d '{"name": "John Doe", "role": "Developer"}'
 ```
 Note: Both name and role are required. If either is missing, the API returns:
+
+```bash
 {
   "error": "Missing name or role"
 }
+```
 
-List Employees (GET) 
+### List Employees (GET) 
 
 Returns a JSON array of all employees:
 
