@@ -35,6 +35,7 @@ variable "private_db_subnets" {
 }
 
 variable "my_ip_cidr" {
+  default = ""
   type = string
 }
 

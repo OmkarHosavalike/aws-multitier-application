@@ -1,0 +1,48 @@
+name: Destroy the AWS resources
+on:
+    workflow_dispatch:
+
+permissions:
+    id-token: true
+    contents: read
+
+env:
+    bucket: ${{ secrets.BACKEND_S3_BUCKET }}
+
+jobs:
+    destroy_resources:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout the code
+              uses: actions/checkout@v4
+            
+            - name: Configure AWS credentials
+              uses: actions/configure-aws-credentials@v5
+              with:
+                role-to-assume: ${{ secrets.OIDC_IAM_ROLE }}
+                aws-region: us-east-1
+
+            - name: Setup terraform 
+              uses: hashicorp/setup-terraform@v3
+              with:
+                terraform_version: 1.7.0
+            
+            - name: Initialize terraform
+              run: |
+                terraform init -input=false -no-color \
+                    -backend-config="bucket=${bucket}"
+
+            - name: Use AWS CLI command to empty the artifact S3 bucket
+              run: |
+                aws s3api delete-objects --bucket "${bucket}" \
+                    --delete "$(aws s3api list-object-versions --bucket "${bucket}" \
+                    --query='{Objects: Versions[].{Key:Key,VersionId:VersionId}}' --output=json)" \
+                    || echo "No object versions to delete"
+                
+                aws s3api delete-objects --bucket "${bucket}" \
+                    --delete "$(aws s3api list-object-versions --bucket "${bucket}" \
+                    --query='{Objects: DeleteMarkers[].{Key:Key,VersionId:VersionId}}' --output=json)" \
+                    || echo "No delete markers to delete"
+
+            - name: Destroy resources
+              run: terraform destroy -auto-approve
