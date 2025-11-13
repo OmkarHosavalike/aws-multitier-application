@@ -34,13 +34,14 @@ jobs:
 
             - name: Use AWS CLI command to empty the artifact S3 bucket
               run: |
-                aws s3api delete-objects --bucket "${bucket}" \
-                    --delete "$(aws s3api list-object-versions --bucket "${bucket}" \
+                artifact_bucket=$(terraform output -raw s3_bucket_name)
+                aws s3api delete-objects --bucket "${artifact_bucket}" \
+                    --delete "$(aws s3api list-object-versions --bucket "${artifact_bucket}" \
                     --query='{Objects: Versions[].{Key:Key,VersionId:VersionId}}' --output=json)" \
                     || echo "No object versions to delete"
                 
-                aws s3api delete-objects --bucket "${bucket}" \
-                    --delete "$(aws s3api list-object-versions --bucket "${bucket}" \
+                aws s3api delete-objects --bucket "${artifact_bucket}" \
+                    --delete "$(aws s3api list-object-versions --bucket "${artifact_bucket}" \
                     --query='{Objects: DeleteMarkers[].{Key:Key,VersionId:VersionId}}' --output=json)" \
                     || echo "No delete markers to delete"
 
